@@ -15,4 +15,24 @@ function Empresa (data) {
   this.plantas = []
 }
 
-module.exports = Empresa
+module.exports = {
+  create (data) {
+    return new Empresa(data)
+  },
+  update (empresa, data) {
+    const {
+      _id, nome, cnpj, cep, endereco, numero, cidade, estado
+    } = data
+
+    empresa._id = _id
+    empresa.nome = nome
+    empresa.cnpj = cnpj
+    empresa.cep = cep
+    empresa.endereco = endereco
+    empresa.numero = numero
+    empresa.cidade = cidade
+    empresa.estado = estado
+
+    return empresa
+  }
+}
