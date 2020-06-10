@@ -39,7 +39,14 @@ module.exports = {
     const userIndex = getIndexById('users', id)
     if (userIndex < 0) return false
 
+    // Remove user do banco de dados
     database.users.splice(userIndex, 1)
+
+    // Remove todas as relações desse user com as empresas
+    database.empresa.forEach(empresa => {
+      this.removeUserFromEmpresa(id, empresa._id)
+    })
+
     return true
   },
 
@@ -52,10 +59,20 @@ module.exports = {
   },
 
   findEmpresa (id) {
-    if (!id) return database.empresa
+    if (!id) {
+      const mappedUsers = []
+      // Mapeia os campos de ids dos usuarios preenchendo com todas as informações
+      database.empresa.forEach(empresa => {
+        empresa.users = empresa.users.map(userId => this.findUser(userId))
+        mappedUsers.push(empresa)
+      })
+      return mappedUsers
+    }
 
     const empresaIndex = getIndexById('empresa', id)
-    return empresaIndex >= 0 ? database.empresa[empresaIndex] : false
+    return empresaIndex >= 0
+      ? database.empresa[empresaIndex].map(userId => this.findUser(userId))
+      : false
   },
 
   updateEmpresa (id, data) {
