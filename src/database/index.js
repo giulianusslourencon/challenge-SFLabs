@@ -1,5 +1,6 @@
 const User = require('./models/User')
 const Empresa = require('./models/Empresa')
+const Planta = require('./models/Planta')
 
 const database = {
   users: [],
@@ -53,23 +54,61 @@ module.exports = {
   findEmpresa (id) {
     if (!id) return database.empresa
 
-    const EmpresaIndex = getIndexById('empresa', id)
-    return EmpresaIndex >= 0 ? database.empresa[EmpresaIndex] : false
+    const empresaIndex = getIndexById('empresa', id)
+    return empresaIndex >= 0 ? database.empresa[empresaIndex] : false
   },
 
   updateEmpresa (id, data) {
-    const EmpresaIndex = getIndexById('empresa', id)
-    if (EmpresaIndex < 0) return false
+    const empresaIndex = getIndexById('empresa', id)
+    if (empresaIndex < 0) return false
 
-    database.empresa[EmpresaIndex] = Empresa.update(database.empresa[EmpresaIndex], data)
-    return database.empresa[EmpresaIndex]
+    database.empresa[empresaIndex] = Empresa.update(database.empresa[empresaIndex], data)
+    return database.empresa[empresaIndex]
   },
 
   deleteEmpresa (id) {
-    const EmpresaIndex = getIndexById('empresa', id)
-    if (EmpresaIndex < 0) return false
+    const empresaIndex = getIndexById('empresa', id)
+    if (empresaIndex < 0) return false
 
-    database.empresa.splice(EmpresaIndex, 1)
+    database.empresa.splice(empresaIndex, 1)
     return true
+  },
+
+  addUserToEmpresa (userId, empresaId) {
+    const userIndex = getIndexById('users', userId)
+    const empresaIndex = getIndexById('empresa', empresaId)
+    if (userIndex < 0 || empresaIndex < 0) return false
+
+    database.empresa[empresaIndex].users.push(userId)
+    return database.empresa[empresaIndex]
+  },
+
+  removeUserFromEmpresa (userId, empresaId) {
+    const empresaIndex = getIndexById('empresa', empresaId)
+    if (empresaIndex < 0) return false
+
+    if (!database.empresa[empresaIndex].users.includes(userId)) return false
+
+    database.empresa[empresaIndex].users =
+      database.empresa[empresaIndex].users.filter(user => user !== userId)
+    return database.empresa[empresaIndex]
+  },
+
+  addPlantaToEmpresa (planta, empresaId) {
+    const empresaIndex = getIndexById('empresa', empresaId)
+    if (empresaIndex < 0) return false
+
+    database.empresa[empresaIndex].plantas.push(Planta.create(planta))
+    return database.empresa[empresaIndex]
+  },
+
+  removePlantaFromEmpresa (planta, empresaId) {
+    const empresaIndex = getIndexById('empresa', empresaId)
+    if (empresaIndex < 0) return false
+
+    database.empresa[empresaIndex].plantas =
+      database.empresa[empresaIndex].plantas
+        .filter(plantaObj => plantaObj.planta !== planta)
+    return database.empresa[empresaIndex]
   }
 }
